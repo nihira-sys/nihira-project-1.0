@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoTrack Vision | Campus Sustainability</title>
+<style>
+:root{--green:#16794b;--deep:#104b35;--mint:#e8f6ee;--bg:#f5f8f5;--ink:#183329;--muted:#6c7c73;--line:#e0e9e2;--white:#fff;--orange:#f2a541}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{background:linear-gradient(115deg,#104b35,#18804e);color:white;padding:18px clamp(18px,5vw,64px);display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:14px;background:#ffffff20;display:grid;place-items:center;font-size:25px}.brand h1{font-size:21px;margin:0}.brand p{margin:4px 0 0;color:#d9f3e2;font-size:12px}.header-right{display:flex;align-items:center;gap:12px}
+.tag{font-size:12px;background:#ffffff1d;padding:8px 12px;border-radius:20px}
+.user-badge{font-size:12px;background:#ffffff2b;padding:6px 12px;border-radius:20px;display:none;align-items:center;gap:6px}
+.btn-logout{background:#ffffff;color:var(--deep);border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+
+/* Auth Modal / Screen */
+#authScreen{flex:1;display:flex;align-items:center;justify-content:center;padding:30px 16px}
+.auth-card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(16,75,53,0.08);width:100%;max-width:440px;padding:32px 28px}
+.nav-tabs{display:flex;border-bottom:2px solid #edf2ee;margin-bottom:20px}
+.nav-tab{flex:1;padding:10px;background:none;border:none;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;background:#f1f6f3;padding:5px;border-radius:12px}
+.role-option{border:none;background:transparent;padding:8px 4px;font-size:12px;font-weight:600;color:var(--muted);border-radius:8px;cursor:pointer;text-align:center}
+.role-option.active{background:var(--white);color:var(--deep);box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.role-info{background:var(--mint);color:var(--deep);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;font-weight:600}
+
+/* Dashboard Content */
+#dashboardScreen{display:none;max-width:1200px;margin:28px auto;padding:0 20px 40px;width:100%}
+.welcome{display:flex;justify-content:space-between;align-items:end;gap:15px;flex-wrap:wrap;margin-bottom:22px}.welcome h2{font-size:27px;margin:0 0 7px}.welcome p{margin:0;color:var(--muted)}.demo{font-size:12px;color:#865611;background:#fff4df;border:1px solid #f4dfb5;padding:9px 12px;border-radius:10px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.stat,.panel{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 16px #173d2507}.stat{padding:18px}.stat-top{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}.stat-icon{font-size:20px}.stat strong{display:block;font-size:28px;margin:12px 0 4px}.stat small{color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}.panel{padding:22px;margin-bottom:20px}.panel h3{margin:0 0 7px;font-size:18px}.sub{color:var(--muted);font-size:13px;margin:0 0 18px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:650;margin:14px 0 7px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid #d7e2d9;border-radius:10px;background:#fff;font:inherit;color:var(--ink)}textarea{min-height:75px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #b6e4c7;border-color:var(--green)}
+.drop{border:2px dashed #b9d7c2;background:#f8fcf9;border-radius:14px;text-align:center;padding:22px 14px;cursor:pointer;display:block}.drop:hover{background:var(--mint)}.drop .big{font-size:30px}.drop b{display:block;margin:8px 0 4px}.drop small{color:var(--muted)}#preview{display:none;max-width:100%;max-height:220px;margin:14px auto 0;border-radius:10px;object-fit:contain}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font-size:14px}.primary{background:var(--green);color:white;width:100%;margin-top:16px}.primary:hover{background:var(--deep)}.secondary{background:var(--mint);color:var(--deep)}.hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}
+.result{display:none;background:#f3faf5;border:1px solid #cfe8d6;border-radius:12px;padding:15px;margin-top:15px}.result h4{margin:0 0 8px}.pill{display:inline-block;font-size:11px;font-weight:700;padding:5px 8px;border-radius:20px;background:#fff0d9;color:#865611}.result p{font-size:13px;line-height:1.55;margin:9px 0}
+.report{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);align-items:flex-start}.report:last-child{border:0}.report-icon{width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:var(--mint);display:grid;place-items:center;font-size:18px}.report-body{flex:1;min-width:0}.report-body b{font-size:13px}.report-body p{font-size:12px;color:var(--muted);margin:5px 0}.report-side{display:flex;flex-direction:column;align-items:end;gap:8px}.status{font-size:10px;padding:5px 7px;border-radius:20px;background:#fff0d9;color:#8b5a0b;white-space:nowrap}.status.Resolved{background:#e4f6e9;color:#187346}.status.In-Progress{background:#e9f0ff;color:#315ca6}.report-side select{width:auto;max-width:130px;padding:6px;font-size:11px}.empty{font-size:13px;color:var(--muted);padding:20px 0;text-align:center}
+
+#cameraWrap video{max-width:100%}.monitor-screen{position:relative;overflow:hidden;min-height:235px;margin-top:14px;border-radius:14px;background:radial-gradient(ellipse at 50% 35%,#245b43 0%,#123c2c 48%,#0a2119 100%);color:#d9f9e5;border:1px solid #276849;padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.screen-top,.screen-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;letter-spacing:1px;color:#b4e5c5;z-index:1}.screen-center{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;z-index:1;padding:18px 0}.screen-center b{font-size:16px}.screen-center span{font-size:12px;color:#a9d4b8}.camera-glyph{font-size:48px;line-height:1;color:#85e4a8;text-shadow:0 0 25px #50d985}.live-dot{width:8px;height:8px;background:#83968a;border-radius:50%;display:inline-block}.live-dot.on{background:#61f38d;box-shadow:0 0 10px #61f38d}.scanline{position:absolute;left:0;right:0;top:20%;height:1px;background:#7bdfa355;display:none;box-shadow:0 0 14px #7bdfa3}.monitor-screen.active .scanline{display:block;animation:scan 3.2s linear infinite}.monitor-screen.active{border-color:#4ebc7a}@keyframes scan{from{top:18%}to{top:88%}}details summary{color:var(--green)}
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tip{background:#f8fbf8;border:1px solid var(--line);border-radius:12px;padding:13px}.tip span{font-size:20px}.tip b{display:block;font-size:12px;margin:8px 0 5px}.tip p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:15px;margin-top:auto}
+@media(max-width:850px){.stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">🌿</div>
+    <div><h1>EcoTrack Vision</h1><p>Smarter campus. Greener future.</p></div>
+  </div>
+  <div class="header-right">
+    <div class="tag">🌎 Campus Sustainability</div>
+    <div class="user-badge" id="userBadge">
+      <span id="badgeRoleText">User</span>: <b id="badgeEmail"></b>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN & SIGN UP SECTION -->
+<main id="authScreen">
+  <div class="auth-card">
+    <div class="nav-tabs">
+      <button type="button" class="nav-tab active" id="tabLogin" onclick="setAuthTab('login')">Log In</button>
+      <button type="button" class="nav-tab" id="tabSignup" onclick="setAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <label style="margin-top:0">Choose Role</label>
+    <div class="role-selector">
+      <button type="button" class="role-option active" onclick="selectRole('User', this)">User</button>
+      <button type="button" class="role-option" onclick="selectRole('Maintenance', this)">Maintenance</button>
+      <button type="button" class="role-option" onclick="selectRole('Admin', this)">Admin</button>
+    </div>
+
+    <div class="role-info" id="roleText">Role: User (Student / Staff)</div>
+
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div id="signupNameBox" style="display:none">
+        <label for="nameInput">Full Name</label>
+        <input type="text" id="nameInput" placeholder="Enter your full name">
+      </div>
+
+      <div id="adminPasskeyBox" style="display:none">
+        <label for="adminCode">Admin Passcode</label>
+        <input type="password" id="adminCode" placeholder="Enter campus admin code">
+      </div>
+
+      <label for="authEmail">Campus Email</label>
+      <input type="email" id="authEmail" required placeholder="username@campus.edu">
+
+      <label for="authPassword">Password</label>
+      <input type="password" id="authPassword" required placeholder="Enter password">
+
+      <button type="submit" class="btn primary" id="authSubmitBtn">Log In as User</button>
+    </form>
+  </div>
+</main>
+
+<!-- MAIN CAMPUS DASHBOARD SECTION (LOGIN KE BAAD DIKHEGA) -->
+<main id="dashboardScreen">
+  <section class="welcome">
+    <div>
+      <h2>Campus Eco Dashboard</h2>
+      <p id="dashboardWelcomeText">Spot visible waste, report issues, and help your campus take action.</p>
+    </div>
+    <div class="demo">⚠️ Single-file prototype · data saved in this browser</div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-top">Total reports <span class="stat-icon">📋</span></div><strong id="totalCount">3</strong><small>Issues reported</small></div>
+    <div class="stat"><div class="stat-top">Open alerts <span class="stat-icon">🔔</span></div><strong id="openCount">2</strong><small>Need attention</small></div>
+    <div class="stat"><div class="stat-top">Resolved <span class="stat-icon">✅</span></div><strong id="resolvedCount">1</strong><small>Marked completed</small></div>
+    <div class="stat"><div class="stat-top">Areas covered <span class="stat-icon">📍</span></div><strong>6</strong><small>Campus locations</small></div>
+  </section>
+
+  <div class="layout">
+    <div>
+      <section class="panel">
+        <h3>📸 Report a campus issue</h3>
+        <p class="sub">Upload a photo of a visible issue. Never install or use cameras in washrooms.</p>
+        <form id="reportForm">
+          <label for="area">Campus area</label>
+          <select id="area" required>
+            <option>Washroom</option><option>Computer Lab</option><option>Classroom</option><option>Hostel</option><option>Canteen</option><option>Garden</option><option>Other</option>
+          </select>
+          <label for="problem">What do you suspect?</label>
+          <select id="problem" required>
+            <option>Water leakage / water on floor</option><option>Tap may be left running</option><option>Overflowing dustbin / litter</option><option>Lights or fans left on</option><option>Other visible issue</option>
+          </select>
+          <label>Upload issue photo</label>
+          <label class="drop" for="photo"><div class="big">⬆️</div><b>Choose a photo</b><small>JPG, PNG or WEBP</small><img id="preview" alt="Photo preview"></label>
+          <input id="photo" type="file" accept="image/*" style="display:none">
+          <label for="description">Extra details (optional)</label>
+          <textarea id="description" placeholder="e.g. Water is collecting near the washbasin..."></textarea>
+          <button class="btn primary" type="submit">Analyse photo & create report</button>
+        </form>
+        <div class="result" id="result" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" id="cameraPanel">
+        <h3>🤖 AI Monitoring Centre</h3>
+        <p class="sub">Automatic monitoring concept for authorised common campus areas.</p>
+        <label for="monitorArea">Authorised monitoring area</label>
+        <select id="monitorArea"><option>Computer Lab</option><option>Classroom</option><option>Corridor</option><option>Canteen common area</option><option>Garden path</option><option>Hostel common area</option></select>
+        <div class="monitor-screen" id="monitorScreen">
+          <div class="screen-top"><span><span class="live-dot"></span> <span id="monitorState">MONITOR OFF</span></span><span id="screenTime">--:--:--</span></div>
+          <div class="screen-center" id="cameraPlaceholder"><div class="camera-glyph">◉</div><b id="screenHeadline">Campus AI monitor</b><span id="screenCaption">Start camera to run on-device object detection</span></div><div id="cameraWrap" style="display:none;position:relative;width:100%;max-width:720px;margin:0 auto 10px"><video id="cameraVideo" autoplay muted playsinline style="display:block;width:100%;max-height:340px;object-fit:contain;border-radius:10px;background:#07150f"></video><canvas id="cameraCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas></div>
+          <div class="scanline"></div>
+          <div class="screen-bottom"><span>PRIVACY FILTER: ON</span><span>EVENT MONITOR</span></div>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:13px">
+          <button class="btn primary" style="width:auto;margin-top:0" type="button" id="startCamera">📷 Start camera AI</button>
+          <button class="btn secondary" type="button" id="stopCamera" disabled>Stop camera</button>
+          <button class="btn secondary" type="button" id="createDetectionReport" disabled>＋ Report latest detection</button>
+        </div>
+        <div id="autoEvent" class="result" style="display:none" aria-live="polite"></div><p class="hint">AI runs in this browser using a downloadable COCO-SSD model. It can identify common objects (for example bottles, cups and people), but it cannot reliably confirm litter, overflowing bins, odour, water leakage, or whether lights/fans are on. Verify every alert yourself. Camera access requires permission and usually HTTPS or localhost.</p>
+      </section>
+
+      <section class="panel">
+        <h3>💧 Resource readings</h3><p class="sub">Record actual meter readings separately.</p>
+        <form id="readingForm">
+          <label for="resource">Resource</label><select id="resource"><option>Water (litres)</option><option>Electricity (kWh)</option></select>
+          <label for="reading">Current reading</label><input id="reading" type="number" min="0" step="any" placeholder="Enter meter reading" required>
+          <button class="btn secondary" type="submit" style="margin-top:12px">Save reading</button>
+        </form><p class="hint" id="readingMessage">No new reading saved yet.</p>
+      </section>
+    </div>
+
+    <div>
+      <section class="panel">
+        <h3>🗂️ Recent reports</h3><p class="sub">Update a report's status as the issue is handled.</p>
+        <div id="reports"></div>
+      </section>
+
+      <section class="panel">
+        <h3>🌱 Eco action suggestions</h3><p class="sub">Simple actions your campus can take.</p>
+        <div class="tips">
+          <div class="tip"><span>🚰</span><b>Save water</b><p>Repair leaking taps and report running flushes quickly.</p></div>
+          <div class="tip"><span>💡</span><b>Save electricity</b><p>Switch off lights and fans in unused rooms after checking.</p></div>
+          <div class="tip"><span>♻️</span><b>Reduce waste</b><p>Empty overflowing bins and encourage waste segregation.</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>EcoTrack Vision · Single-file browser prototype · Local data is stored only in this browser</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script>
+// --- SINGLE-FILE LOCAL APP: browser storage is not a secure server/database ---
+let authMode = 'login';
+let selectedRole = 'User';
+
+function selectRole(role, btn){
+  selectedRole = role;
+  document.querySelectorAll('.role-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const textMap = {
+    User: 'Role: User (Student / Faculty)',
+    Maintenance: 'Role: Campus Maintenance & Staff',
+    Admin: 'Role: System Administrator'
+  };
+  document.getElementById('roleText').textContent = textMap[role];
+  document.getElementById('adminPasskeyBox').style.display = (authMode === 'signup' && role === 'Admin') ? 'block' : 'none';
+  updateAuthBtn();
+}
+
+function setAuthTab(mode){
+  authMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('signupNameBox').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('adminPasskeyBox').style.display = (mode === 'signup' && selectedRole === 'Admin') ? 'block' : 'none';
+  updateAuthBtn();
+}
+
+function updateAuthBtn(){
+  const action = authMode === 'login' ? 'Log In' : 'Sign Up';
+  document.getElementById('authSubmitBtn').textContent = `${action} as ${selectedRole}`;
+}
+
+function handleAuth(e){
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim().toLowerCase();
+  const password = document.getElementById('authPassword').value;
+  const users = JSON.parse(localStorage.getItem('ecoUsers') || '{}');
+  if(authMode === 'signup'){
+    const name = document.getElementById('nameInput').value.trim();
+    if(!name){ alert('Please enter your full name.'); return; }
+    if(selectedRole === 'Admin' && document.getElementById('adminCode').value !== 'ECOADMIN2026'){
+      alert('Demo admin passcode is ECOADMIN2026. Change it before any public demonstration.'); return;
+    }
+    if(users[email]){ alert('This email is already registered in this browser. Please log in.'); return; }
+    users[email] = {name, password, role:selectedRole};
+    localStorage.setItem('ecoUsers', JSON.stringify(users));
+    alert('Account created in this browser. You can now log in.');
+    setAuthTab('login');
+    document.getElementById('authPassword').value = '';
+    return;
+  }
+  // Demo convenience: if no account exists, allow a local demo login.
+  const user = users[email];
+  if(user && user.password !== password){ alert('Incorrect password.'); return; }
+  if(user) selectedRole = user.role;
+  openDashboard(email, selectedRole);
+}
+function openDashboard(email, role){
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  const badge = document.getElementById('userBadge');
+  badge.style.display = 'inline-flex';
+  document.getElementById('badgeRoleText').textContent = role;
+  document.getElementById('badgeEmail').textContent = email;
+  document.getElementById('dashboardWelcomeText').textContent = `Logged in as ${role} (${email}). Spot issues and take action.`;
+  currentUser = email;
+}
+let currentUser = 'guest';
+
+function logout(){
+  stopCamera();
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('userBadge').style.display = 'none';
+  document.getElementById('authForm').reset();
+  currentUser = 'guest';
+}
+
+// --- ORIGINAL DASHBOARD LOGIC ---
+const sampleReports=[
+  {id:1,area:"Washroom",problem:"Possible water leakage",severity:"Medium",status:"Open",time:"Sample report"},
+  {id:2,area:"Computer Lab",problem:"Lights/fans may be left on",severity:"Low",status:"In Progress",time:"Sample report"},
+  {id:3,area:"Canteen",problem:"Overflowing dustbin",severity:"High",status:"Resolved",time:"Sample report"}
+];
+let reports = JSON.parse(localStorage.getItem('ecoReports') || 'null') || sampleReports.slice(), selectedFile = null;
+function saveReports(){ localStorage.setItem('ecoReports', JSON.stringify(reports)); }
+const photo = document.getElementById('photo'), preview = document.getElementById('preview');
+
+photo.addEventListener('change',()=>{
+  selectedFile = photo.files[0] || null;
+  if(selectedFile){
+    preview.src = URL.createObjectURL(selectedFile);
+    preview.style.display = 'block';
+    document.querySelector('.drop b').textContent = selectedFile.name;
+  } else {
+    preview.style.display = 'none';
+  }
+});
+
+function renderReports(){
+  const host = document.getElementById('reports');
+  host.innerHTML = '';
+  saveReports();
+  if(!reports.length){ host.innerHTML = '<div class="empty">No reports yet.</div>'; }
+  reports.slice().reverse().forEach(r=>{
+    const row = document.createElement('div'); row.className = 'report';
+    const icon = r.area === 'Washroom' ? '🚰' : r.area === 'Garden' ? '🌿' : r.area === 'Canteen' ? '♻️' : '💡';
+    row.innerHTML = `<div class="report-icon">${icon}</div><div class="report-body"><b></b><p></p><small style="color:#819087;font-size:11px"></small></div><div class="report-side"><span class="status"></span><select aria-label="Change status"><option>Open</option><option>In Progress</option><option>Resolved</option></select></div>`;
+    row.querySelector('b').textContent = r.problem;
+    row.querySelector('p').textContent = r.area + ' · ' + r.severity + ' priority';
+    row.querySelector('small').textContent = r.time;
+    const pill = row.querySelector('.status');
+    pill.textContent = r.status;
+    pill.className = 'status ' + r.status.replace(' ','-');
+    const sel = row.querySelector('select');
+    sel.value = r.status;
+    sel.addEventListener('change', ()=>{ r.status = sel.value; renderReports(); });
+    host.appendChild(row);
+  });
+  document.getElementById('totalCount').textContent = reports.length;
+  document.getElementById('openCount').textContent = reports.filter(r => r.status !== 'Resolved').length;
+  document.getElementById('resolvedCount').textContent = reports.filter(r => r.status === 'Resolved').length;
+}
+
+document.getElementById('reportForm').addEventListener('submit', e =>{
+  e.preventDefault();
+  const area = document.getElementById('area').value, chosen = document.getElementById('problem').value;
+  const desc = document.getElementById('description').value.trim();
+  let finding = chosen, advice = 'Ask campus maintenance staff to inspect and verify this issue.';
+  if(chosen.includes('Water leakage')){ finding = 'Possible water leakage'; advice = 'Check pipes and taps.'; }
+  else if(chosen.includes('Tap')){ finding = 'Tap may be running'; advice = 'Close tap if safe.'; }
+  else if(chosen.includes('dustbin')){ finding = 'Overflowing bin'; advice = 'Arrange waste clearance.'; }
+  else if(chosen.includes('Lights')){ finding = 'Lights/fans left on'; advice = 'Switch off when unneeded.'; }
+
+  reports.push({id: Date.now(), area, problem: finding, severity: chosen.includes('Water') ? 'High' : 'Medium', status: 'Open', time: 'Just now'});
+  renderReports();
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  result.innerHTML = `<h4>Demo analysis result</h4><span class="pill">Needs human verification</span><p>Area: ${area} · Issue: ${finding}</p><p>Action: ${advice}</p>`;
+});
+
+document.getElementById('readingForm').addEventListener('submit', e =>{
+  e.preventDefault();
+  const resource = document.getElementById('resource').value, val = document.getElementById('reading').value;
+  const readings = JSON.parse(localStorage.getItem('ecoReadings') || '[]');
+  readings.push({resource, value:Number(val), time:new Date().toLocaleString(), user:currentUser});
+  localStorage.setItem('ecoReadings', JSON.stringify(readings));
+  document.getElementById('readingMessage').textContent = `Saved in this browser: ${val} ${resource.startsWith('Water') ? 'litres' : 'kWh'} (${readings.length} readings stored).`;
+  e.target.reset();
+});
+
+// --- Browser camera + client-side AI object detection ---
+let cameraStream = null, aiModel = null, cameraLoop = null, latestDetection = null;
+const monitorScreen = document.getElementById('monitorScreen');
+const video = document.getElementById('cameraVideo');
+const canvas = document.getElementById('cameraCanvas');
+const ctx = canvas.getContext('2d');
+const startCameraBtn = document.getElementById('startCamera');
+const stopCameraBtn = document.getElementById('stopCamera');
+const reportDetectionBtn = document.getElementById('createDetectionReport');
+function setCameraMessage(title, message){
+  document.getElementById('screenHeadline').textContent = title;
+  document.getElementById('screenCaption').textContent = message;
+  document.getElementById('autoEvent').style.display = 'block';
+  document.getElementById('autoEvent').textContent = message;
+}
+async function startCamera(){
+  if(cameraStream) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setCameraMessage('Camera unavailable', 'Open this file using localhost or HTTPS in a modern browser, then try again.'); return;
+  }
+  try{
+    setCameraMessage('Loading AI model…', 'First start needs an internet connection to download the object-detection model.');
+    startCameraBtn.disabled = true;
+    cameraStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false});
+    video.srcObject = cameraStream;
+    await video.play();
+    document.getElementById('cameraPlaceholder').style.display = 'none';
+    document.getElementById('cameraWrap').style.display = 'block';
+    monitorScreen.classList.add('active');
+    document.getElementById('monitorState').textContent = 'CAMERA STARTING';
+    document.querySelector('.live-dot').classList.add('on');
+    stopCameraBtn.disabled = false;
+    if(!aiModel){
+      if(!window.cocoSsd || !window.tf) throw new Error('AI libraries did not load. Check your internet connection.');
+      aiModel = await cocoSsd.load();
+    }
+    document.getElementById('monitorState').textContent = 'LIVE AI DETECTION';
+    setCameraMessage('Camera AI is running', 'Objects are detected locally in your browser. Findings need human verification.');
+    detectFrame();
+  }catch(err){
+    stopCamera();
+    setCameraMessage('Could not start camera', err.name === 'NotAllowedError' ? 'Camera permission was denied. Allow camera access in your browser.' : (err.message || 'Check camera permissions and internet connection.'));
+  }finally{ startCameraBtn.disabled = false; }
+}
+async function detectFrame(){
+  if(!cameraStream || !aiModel || video.readyState < 2) return;
+  try{
+    const predictions = await aiModel.detect(video);
+    const w = video.videoWidth, h = video.videoHeight;
+    if(w && h){
+      canvas.width = w; canvas.height = h;
+      ctx.clearRect(0,0,w,h);
+      predictions.filter(p=>p.score >= 0.55).forEach(p=>{
+        const [x,y,bw,bh] = p.bbox;
+        ctx.lineWidth = Math.max(2,w/320); ctx.strokeStyle = '#65ff9a'; ctx.strokeRect(x,y,bw,bh);
+        const label = `${p.class} ${Math.round(p.score*100)}%`;
+        ctx.font = `${Math.max(14,w/45)}px Arial`;
+        const tw = ctx.measureText(label).width;
+        ctx.fillStyle = '#65ff9a'; ctx.fillRect(x,Math.max(0,y-26),tw+12,25);
+        ctx.fillStyle = '#062516'; ctx.fillText(label,x+6,Math.max(17,y-8));
+      });
+    }
+    const relevant = predictions.filter(p=>p.score>=0.60).sort((a,b)=>b.score-a.score);
+    const found = relevant[0];
+    if(found){
+      latestDetection = {label:found.class, score:found.score, time:new Date().toLocaleTimeString()};
+      document.getElementById('screenCaption').textContent = `Objects visible: ${relevant.map(p=>p.class).slice(0,4).join(', ')}. This is object detection, not proof of waste.`;
+      reportDetectionBtn.disabled = false;
+      document.getElementById('autoEvent').style.display = 'block';
+      document.getElementById('autoEvent').textContent = `Latest detection: ${found.class} (${Math.round(found.score*100)}% confidence). Please check the scene before creating a report.`;
+    } else {
+      document.getElementById('screenCaption').textContent = 'No common objects detected with confidence above 60%.';
+    }
+  }catch(err){ console.error(err); }
+  if(cameraStream) cameraLoop = setTimeout(detectFrame, 1200);
+}
+function stopCamera(){
+  if(cameraLoop){ clearTimeout(cameraLoop); cameraLoop = null; }
+  if(cameraStream){ cameraStream.getTracks().forEach(track=>track.stop()); cameraStream = null; }
+  video.srcObject = null;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('cameraWrap').style.display = 'none';
+  document.getElementById('cameraPlaceholder').style.display = 'flex';
+  monitorScreen.classList.remove('active');
+  document.getElementById('monitorState').textContent = 'MONITOR OFF';
+  document.querySelector('.live-dot').classList.remove('on');
+  document.getElementById('screenHeadline').textContent = 'Campus AI monitor';
+  document.getElementById('screenCaption').textContent = 'Start camera to run on-device object detection';
+  startCameraBtn.disabled = false; stopCameraBtn.disabled = true;
+  reportDetectionBtn.disabled = !latestDetection;
+}
+startCameraBtn.addEventListener('click', startCamera);
+stopCameraBtn.addEventListener('click', stopCamera);
+reportDetectionBtn.addEventListener('click', ()=>{
+  if(!latestDetection) return;
+  const area = document.getElementById('monitorArea').value;
+  reports.push({id:Date.now(),area,problem:`AI detected ${latestDetection.label} — check if it is litter`,severity:['bottle','cup','wine glass','banana','apple'].includes(latestDetection.label)?'Medium':'Low',status:'Open',time:`AI ${latestDetection.time}`});
+  renderReports();
+  document.getElementById('autoEvent').textContent = `Report created for ${latestDetection.label}. Maintenance staff should verify the issue in person.`;
+});
+setInterval(()=>{ document.getElementById('screenTime').textContent = new Date().toLocaleTimeString(); },1000);
+
+renderReports();
+</script>
+</body>
+</html>
